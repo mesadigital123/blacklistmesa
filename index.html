@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blacklist</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+    body {
+      background-color: #121214;
+      margin: 0;
+      padding: 30px 15px;
+      color: #e1e1e6;
+    }
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+      background: #202024;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      padding: 28px;
+      border: 1px solid #29292e;
+    }
+    h1 {
+      margin-top: 0;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .status-badge {
+      font-size: 12px;
+      background-color: rgba(4, 211, 97, 0.1);
+      color: #04d361;
+      border: 1px solid rgba(4, 211, 97, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .status-error {
+      background-color: rgba(247, 90, 104, 0.1);
+      color: #f75a68;
+      border: 1px solid rgba(247, 90, 104, 0.2);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 25px;
+      background: #121214;
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid #29292e;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #a8a8b3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 11px 14px;
+      background-color: #202024;
+      border: 1px solid #323238;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input[type="text"]:focus, input[type="date"]:focus {
+      border-color: #e53935;
+      box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.2);
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+    .btn-container {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+    button {
+      padding: 12px 24px;
+      background-color: #e53935;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    button:hover {
+      background-color: #d32f2f;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    button:disabled {
+      background-color: #323238;
+      color: #7c7c8a;
+      cursor: not-allowed;
+    }
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #29292e;
+      font-size: 14px;
+    }
+    th {
+      background-color: #121214;
+      color: #a8a8b3;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+    .empty-msg {
+      text-align: center;
+      color: #7c7c8a;
+      padding: 24px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>
+    Blacklist
+    <span class="status-badge" id="status">Sincronizando...</span>
+  </h1>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="contaInput">Conta</label>
+      <input type="text" id="contaInput" placeholder="Ex: 12345" />
+    </div>
+    <div class="form-group">
+      <label for="nomeInput">Nome</label>
+      <input type="text" id="nomeInput" placeholder="Nome do cliente" />
+    </div>
+    <div class="form-group">
+      <label for="plInput">PL</label>
+      <input type="text" id="plInput" placeholder="R$ 0,00" />
+    </div>
+    <div class="form-group">
+      <label for="solicitanteInput">Solicitante</label>
+      <input type="text" id="solicitanteInput" placeholder="Nome do solicitante" />
+    </div>
+    <div class="form-group">
+      <label for="dataRetiradaInput">Data da Retirada</label>
+      <input type="date" id="dataRetiradaInput" />
+    </div>
+    <div class="btn-container">
+      <button id="btnAdicionar" onclick="adicionarRegistro()">Acrescer Registro</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Conta</th>
+          <th>Nome</th>
+          <th>PL</th>
+          <th>Solicitante</th>
+          <th>Data da Retirada</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaBlacklist">
+        <tr>
+          <td colspan="5" class="empty-msg">Carregando dados da planilha...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/a/macros/w1.com.br/s/AKfycbx1nBIC2s6GzE3C7ZD6q98N4zP8M87aLAJp7_MHpVxfjQk8Glp162ZccgDTM5doB7EN/exec';
+
+  let dadosBlacklist = [];
+
+  async function carregarPlanilha() {
+    const statusEl = document.getElementById('status');
+    try {
+      const response = await fetch(SCRIPT_URL);
+      if (!response.ok) throw new Error('Falha na resposta do servidor');
+      
+      dadosBlacklist = await response.json();
+      renderizarTabela();
+      
+      statusEl.classList.remove('status-error');
+      statusEl.innerText = 'Atualizado às ' + new Date().toLocaleTimeString();
+    } catch (error) {
+      console.error('Falha ao sincronizar:', error);
+      statusEl.classList.add('status-error');
+      statusEl.innerText = 'Erro na sincronização';
+    }
+  }
+
+  function renderizarTabela() {
+    const tbody = document.getElementById('tabelaBlacklist');
+    tbody.innerHTML = '';
+
+    if (!dadosBlacklist || dadosBlacklist.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum registro encontrado.</td></tr>';
+      return;
+    }
+
+    dadosBlacklist.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.conta || '-'}</td>
+        <td>${item.nome || '-'}</td>
+        <td>${item.pl || '-'}</td>
+        <td>${item.solicitante || '-'}</td>
+        <td>${item.dataRetirada || '-'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function adicionarRegistro() {
+    const conta = document.getElementById('contaInput').value.trim();
+    const nome = document.getElementById('nomeInput').value.trim();
+    const pl = document.getElementById('plInput').value.trim();
+    const solicitante = document.getElementById('solicitanteInput').value.trim();
+    const dataRetirada = document.getElementById('dataRetiradaInput').value;
+
+    if (!nome && !conta) {
+      alert('Por favor, preencha ao menos a Conta ou o Nome.');
+      return;
+    }
+
+    const btn = document.getElementById('btnAdicionar');
+    btn.disabled = true;
+    btn.innerText = 'Enviando...';
+
+    const payload = { conta, nome, pl, solicitante, dataRetirada };
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      document.getElementById('contaInput').value = '';
+      document.getElementById('nomeInput').value = '';
+      document.getElementById('plInput').value = '';
+      document.getElementById('solicitanteInput').value = '';
+      document.getElementById('dataRetiradaInput').value = '';
+
+      setTimeout(() => {
+        carregarPlanilha();
+        btn.disabled = false;
+        btn.innerText = 'Acrescer Registro';
+      }, 1500);
+
+    } catch (error) {
+      console.error('Erro ao adicionar registro:', error);
+      alert('Houve um erro ao tentar salvar na planilha.');
+      btn.disabled = false;
+      btn.innerText = 'Acrescer Registro';
+    }
+  }
+
+  carregarPlanilha();
+  setInterval(carregarPlanilha, 30000);
+</script>
+
+</body>
+</html>
