@@ -93,6 +93,7 @@
       grid-column: 1 / -1;
       display: flex;
       justify-content: flex-end;
+      gap: 10px;
       margin-top: 4px;
     }
     button {
@@ -116,6 +117,14 @@
       background-color: #323238;
       color: #7c7c8a;
       cursor: not-allowed;
+    }
+    .btn-export {
+      background-color: #121214;
+      color: #04d361;
+      border: 1px solid rgba(4, 211, 97, 0.4);
+    }
+    .btn-export:hover {
+      background-color: rgba(4, 211, 97, 0.1);
     }
     .table-responsive {
       overflow-x: auto;
@@ -182,6 +191,7 @@
       <input type="date" id="dataRetiradaInput" />
     </div>
     <div class="btn-container">
+      <button type="button" class="btn-export" onclick="exportarParaCSV()">Exportar Excel (.csv)</button>
       <button id="btnAdicionar" onclick="adicionarRegistro()">Acrescer Registro</button>
     </div>
   </div>
@@ -295,6 +305,41 @@
       btn.disabled = false;
       btn.innerText = 'Acrescer Registro';
     }
+  }
+
+  function exportarParaCSV() {
+    if (!dadosBlacklist || dadosBlacklist.length === 0) {
+      alert('Não há dados para exportar no momento.');
+      return;
+    }
+
+    // Cabeçalho das colunas do CSV
+    const cabecalho = ['Conta', 'Nome', 'PL', 'Solicitante', 'Data da Retirada'];
+    
+    // Mapeia os dados tratando caracteres especiais e vírgulas
+    const linhas = dadosBlacklist.map(item => [
+      `"${(item.conta || '').toString().replace(/"/g, '""')}"`,
+      `"${(item.nome || '').toString().replace(/"/g, '""')}"`,
+      `"${(item.pl || '').toString().replace(/"/g, '""')}"`,
+      `"${(item.solicitante || '').toString().replace(/"/g, '""')}"`,
+      `"${(item.dataRetirada || '').toString().replace(/"/g, '""')}"`
+    ].join(';')); // Usa ponto e vírgula ';' para melhor compatibilidade com o Excel no Brasil
+
+    // Unifica cabeçalho e linhas (com o BOM UTF-8 \uFEFF para acentos abrirem corretamente no Excel)
+    const csvContent = '\uFEFF' + [cabecalho.join(';'), ...linhas].join('\n');
+
+    // Cria o Blob e faz o download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    const dataAtual = new Date().toISOString().split('T')[0];
+    link.setAttribute('href', url);
+    link.setAttribute('download', `blacklist_${dataAtual}.csv`);
+    document.body.appendChild(link);
+    
+    link.click();
+    document.body.removeChild(link);
   }
 
   carregarPlanilha();
